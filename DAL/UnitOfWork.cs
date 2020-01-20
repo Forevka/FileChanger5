@@ -17,11 +17,6 @@ namespace FileChanger3.DAL
             Context = context;
         }
 
-        public UnitOfWork()
-        {
-            Context = new PublicContext();
-        }
-
         public Repository<TEntity, TPKey> Repository<TEntity, TPKey>() where TEntity : class
         {
             if (_repositories == null)
