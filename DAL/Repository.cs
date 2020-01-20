@@ -1,18 +1,17 @@
-﻿using System;
+﻿using FileChanger3.Abstraction;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
-using FileChanger3.Abstraction;
-using Microsoft.EntityFrameworkCore;
 
 namespace FileChanger3.Dal
 {
-    public class Repository<TEntity, PKType> : IRepository<TEntity, PKType> where TEntity : class
+    public class Repository<TEntity, TPkType> : IRepository<TEntity, TPkType> where TEntity : class
     {
-        protected readonly DbContext _context;
-        protected readonly DbSet<TEntity> _entities;
+        private readonly DbContext _context;
+        private readonly DbSet<TEntity> _entities;
 
         public Repository(DbContext context)
         {
@@ -20,18 +19,23 @@ namespace FileChanger3.Dal
             _entities = context.Set<TEntity>();
         }
 
-
-        public TEntity Get(PKType id)
-        {
-            return _context.Set<TEntity>().Find(id);
-        }
-
         public TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
             return _context.Set<TEntity>().FirstOrDefault(predicate);
         }
 
-        public async Task<TEntity> GetAsync(PKType id)
+        public Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return _context.Set<TEntity>().FirstOrDefaultAsync(predicate);
+        }
+
+        #region Get
+        public TEntity Get(TPkType id)
+        {
+            return _context.Set<TEntity>().Find(id);
+        }
+
+        public async Task<TEntity> GetAsync(TPkType id)
         {
             return await _context.Set<TEntity>().FindAsync(id);
         }
@@ -45,20 +49,12 @@ namespace FileChanger3.Dal
         {
             return _context.Set<TEntity>().ToListAsync();
         }
+        #endregion
 
+        #region Find
         public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
         {
             return _context.Set<TEntity>().Where(predicate);
-        }
-
-        /// <summary>
-        /// Return first or default element from context
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        public Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return _context.Set<TEntity>().FirstOrDefaultAsync(predicate);
         }
 
         public Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
@@ -91,8 +87,9 @@ namespace FileChanger3.Dal
         {
             return FindWithInclude(predicate, include).ToListAsync();
         }
+        #endregion
 
-
+        #region Add
         public void Add(TEntity entity)
         {
             if (entity == null)
@@ -118,30 +115,26 @@ namespace FileChanger3.Dal
         public void AddOnSave(TEntity entity)
         {
             if (entity == null)
-            {
                 return;
-            }
+
             _context.Set<TEntity>().Add(entity);
         }
 
         public void AddRange(IEnumerable<TEntity> entities)
         {
             if (entities == null)
-            {
                 return;
-            }
 
             _context.Set<TEntity>().AddRange(entities);
             _context.SaveChanges();
         }
+        #endregion
 
-
+        #region Remove
         public void Remove(TEntity entity)
         {
             if (entity == null)
-            {
                 return;
-            }
 
             _context.Set<TEntity>().Remove(entity);
             _context.SaveChanges();
@@ -150,9 +143,7 @@ namespace FileChanger3.Dal
         public void RemoveOnSave(TEntity entity)
         {
             if (entity == null)
-            {
                 return;
-            }
 
             _context.Set<TEntity>().Remove(entity);
         }
@@ -167,7 +158,9 @@ namespace FileChanger3.Dal
             _context.Set<TEntity>().RemoveRange(entities);
             _context.SaveChanges();
         }
+        #endregion
 
+        #region Update
         public virtual void UpdateOnSave(TEntity entity)
         {
             if (entity == null)
@@ -199,5 +192,6 @@ namespace FileChanger3.Dal
             _context.Entry(entity).State = EntityState.Modified;
             _context.SaveChanges();
         }
+        #endregion
     }
 }

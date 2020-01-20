@@ -17,7 +17,6 @@ namespace FileChanger3.Dal
         }
 
         #region Model Sets
-
         public virtual Microsoft.EntityFrameworkCore.DbSet<House> Houses { get; set; }
         public virtual Microsoft.EntityFrameworkCore.DbSet<Person> Persons { get; set; }
 
@@ -25,6 +24,10 @@ namespace FileChanger3.Dal
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("public");
+
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.HasPostgresExtension("uuid-ossp");
 
             modelBuilder.Entity<Person>()
