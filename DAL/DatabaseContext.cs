@@ -5,9 +5,9 @@ using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace FileChanger3.Dal
 {
-    public class DatabaseContext : DbContext
+    public class PublicContext : DbContext
     {
-        public DatabaseContext() : base()
+        public PublicContext() : base()
         {
         }
 
