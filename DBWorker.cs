@@ -32,7 +32,10 @@ namespace FileChanger3
                     this.DBname,
                     this.Port,
                     this.Password);
-            this.conn = new NpgsqlConnection(connString);
+            this.conn = new NpgsqlConnection(connString)
+            {
+                UserCertificateValidationCallback = (sender, certificate, chain, errors) => true
+            };
             this.conn.Open();
 
         }
