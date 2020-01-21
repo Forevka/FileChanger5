@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FileChanger3.Abstraction;
+using FileChanger3.Dal;
+using FileChanger3.DAL;
+using FileChanger3.Dal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -18,22 +22,23 @@ namespace Routes.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
+        private ContextFactory contextFactory = new ContextFactory();
+        private UnitOfWork unitOfWork;
+
+        private IRepository<Person, Guid> personRepo;
+
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
+            contextFactory.RegisterContext<PublicContext>("public");
+            var unit = new UnitOfWork(contextFactory.GetContext("public"));
+            personRepo = unit.Repository<Person, Guid>();
             _logger = logger;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public IEnumerable<Person> Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return personRepo.GetAll();
         }
     }
 }
