@@ -14,12 +14,21 @@ namespace FileChanger3.DAL
             if (!_contexts.ContainsKey(dbName))
                 throw new NotImplementedException($"context for {dbName} doesn't register or exist");
 
-            var type = _contexts[dbName];
-            return Activator.CreateInstance(type) as DbContext;
-
+            return Activator.CreateInstance(_contexts[dbName]) as DbContext;
         }
 
-        public void RegisterContext<T>(string dbName)
+        public DbContext GetContext(string dbName, bool needMigrate)
+        {
+            if (!_contexts.ContainsKey(dbName))
+                throw new NotImplementedException($"context for {dbName} doesn't register or exist");
+
+            var context = Activator.CreateInstance(_contexts[dbName]) as IContext;
+            if (needMigrate)
+                context.Migrate();
+            return context as DbContext;
+        }
+
+        public void RegisterContext<T>(string dbName) where T : IContext
         {
             _contexts.Add(dbName, typeof(T));
         }

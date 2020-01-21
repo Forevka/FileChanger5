@@ -6,6 +6,6 @@ namespace FileChanger3.Abstraction
     {
         DbContext GetContext(string dbName);
 
-        void RegisterContext<T>(string dbName);
+        void RegisterContext<T>(string dbName) where T : IContext;
     }
 }

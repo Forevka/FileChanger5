@@ -14,9 +14,11 @@ namespace FileChanger3
         {
             contextFactory.RegisterContext<PublicContext>("public");
 
-            var unitOfWork = new UnitOfWork(contextFactory.GetContext("public"));
+            var unitOfWork = new UnitOfWork(contextFactory.GetContext("public", true));
 
             var repo = unitOfWork.Repository<Person, Guid>();
+
+            repo.Add(new Person(){Age = 32});
 
             Console.WriteLine(repo.Find(x => x.Age >= 10).FirstOrDefault().Id);
         }

@@ -1,14 +1,41 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
+using FileChanger3.Abstraction;
 using FileChanger3.Dal.Models;
 using Microsoft.EntityFrameworkCore;
 using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace FileChanger3.Dal
 {
-    public class PublicContext : DbContext
+    public class PublicContext : DbContext, IContext
     {
-        public PublicContext() : base()
+        public string SchemaName => "public";
+
+        public PublicContext() : base() { }
+
+        public PublicContext(bool needMigrate) : base()
         {
+            if (needMigrate)
+                Migrate();
+        }
+
+        public void Migrate()
+        {
+            var createScript = Database.GenerateCreateScript();
+
+            foreach (var sqlCode in createScript.Split("\r\n\r\n"))
+            {
+                try
+                { 
+                    var trans = Database.BeginTransaction();
+                    Database.ExecuteSqlRaw(sqlCode);
+                    trans.Commit();
+                }
+                catch (Npgsql.PostgresException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -19,14 +46,14 @@ namespace FileChanger3.Dal
         #region Model Sets
         public virtual Microsoft.EntityFrameworkCore.DbSet<House> Houses { get; set; }
         public virtual Microsoft.EntityFrameworkCore.DbSet<Person> Persons { get; set; }
-
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("public");
+            modelBuilder.HasDefaultSchema(SchemaName);
 
             base.OnModelCreating(modelBuilder);
+
 
             modelBuilder.HasPostgresExtension("uuid-ossp");
 
