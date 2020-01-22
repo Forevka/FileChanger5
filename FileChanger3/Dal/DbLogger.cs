@@ -40,7 +40,7 @@ namespace FileChanger3.Dal
                     exception = exception?.GetType().Name
                 }, Formatting.Indented);
 
-                File.AppendAllText("log.txt", "\r\n" + jsonLine + "\r\n");
+                File.AppendAllText("db.log", "\r\n" + jsonLine + "\r\n");
             }
         }
     }
